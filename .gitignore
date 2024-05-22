@@ -1,0 +1,13 @@
+__pypackages__/
+.venv/
+.poetry/
+
+.pytest_cache/
+pytest.ini
+__pycache__/
+
+.vscode/
+.idea/
+
+.DS_Store
+Thumbs.db
