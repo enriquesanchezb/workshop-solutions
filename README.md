@@ -63,6 +63,10 @@ From the original text, convert it to a Shakespearean tone, using archaic expres
 - Add the new feature as code.
 - Write tests cases to validate the requirements.
 
+### Exercise 4
+
+Take a look into the security tests and try to fix the prompt to avoid the issues. Create more tests to ensure the system is secure.
+
 
 ## Tips for Testing
 
