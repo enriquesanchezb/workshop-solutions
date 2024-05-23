@@ -10,40 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache-key.outputs.key }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Get cache key
-        id: cache-key
-        run: echo "::set-output name=key::$(date +%s)"
-
-      - name: Install dependencies
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          poetry install
-
-      - name: Install Ollama
-        run: |
-          apt-get update && apt-get install -y git build-essential curl
-          curl https://ollama.ai/install.sh | sh
-          ollama serve&
-          ollama pull phi3
-          ollama pull llama3
-
   test:
-    needs: setup
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -68,9 +35,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Use Poetry Cache
+      - name: Install Poetry
         run: |
+          curl -sSL https://install.python-poetry.org | python3 -
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
           poetry install
 
       - name: Install Ollama
@@ -81,7 +52,7 @@ jobs:
           ollama pull phi3
           ollama pull llama3
 
-      - name: Run all tests
+      - name: Run specific test
         run: |
           poetry run pytest tests/${{ matrix.test }}
         env:
