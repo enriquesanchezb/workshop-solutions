@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "workshop-solutions"
+version = "0.1.0"
+description = ""
+authors = ["Enrique Sanchez <je.sanchezb@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+gradio = "^4.26.0"
+ollama = "^0.1.8"
+langchain = "^0.1.16"
+langchain-community = "^0.0.33"
+faster-whisper = "^1.0.1"
+transformers = "^4.39.3"
+tensorflow = "^2.16.1"
+tf-keras = "^2.16.0"
+gtts = "^2.5.1"
+colorama = "^0.4.6"
+tqdm = "^4.66.4"
+datasets = "^2.19.1"
+evaluate = "^0.4.2"
+rouge = "^1.0.1"
+sacrebleu = "^2.4.2"
+ruff = "^0.4.4"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1.1"
+playwright = "^1.43.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+pythonpath = [".", "tests"]
