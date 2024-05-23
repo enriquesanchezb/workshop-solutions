@@ -1,10 +1,9 @@
-name: Sentiment Analysis for Voice
+name: Daily execution
 
 on:
-  push:
-    branches: ["main", "5-github-actions"]
-  pull_request:
-    branches: ["main", "5-github-actions"]
+  schedule:
+    - cron: "0 0 * * *" # Runs at midnight UTC every day
+  workflow_dispatch: # Allows manual triggering of the workflow
 
 permissions:
   contents: read
@@ -13,9 +12,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        test: [test_sentiment.py, test_summarize.py, test_transcribe.py]
+        test: [test_security.py]
 
     steps:
       - name: Checkout code
@@ -52,4 +51,4 @@ jobs:
       - name: Rerun Failed Tests
         if: ${{ failure() }}
         run: |
-          poetry run pytest tests/${{ matrix.test }} --reruns 3
+          poetry run pytest tests/${{ matrix.test }} --reruns 2
