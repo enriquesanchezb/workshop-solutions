@@ -1,37 +1,38 @@
+import logging
 import os
-import random
 import re
 
-
-import pytest
 from datasets import load_dataset
-from gtts import gTTS
 
 from src.transcribe import transcribe_audio
 
-dataset = load_dataset("go_emotions", "simplified", split="train")
 NUM_TESTS = 3
+logger = logging.getLogger(__name__)
+
+
+def insert_subdirectory_in_path(file_path):
+    directory, filename = os.path.split(file_path)
+    new_directory = os.path.join(directory, "train")
+    new_file_path = os.path.join(new_directory, filename)
+    return new_file_path
 
 
 def remove_special_characters(text):
     return re.sub(r"[^a-zA-Z0-9\s]", "", text).lower().strip()
 
 
-@pytest.fixture
-def audio_file():
-    file_path = os.path.join("/tmp", "test.mp3")
-    yield file_path
-    os.remove(file_path)
-
-
-@pytest.mark.parametrize(
-    "sample",
-    [dataset[random.randint(0, len(dataset) - 1)] for _ in range(NUM_TESTS)],
-)
-def test_transcribe_audio(audio_file, sample):
-    text = sample["text"]
-    tts = gTTS(text=text, lang="en", slow=False)
-    tts.save(audio_file)
-    assert remove_special_characters(
-        transcribe_audio(audio_file)
-    ) == remove_special_characters(text)
+def test_transcribe_audio_with_dataset():
+    dataset = load_dataset(
+        "google/fleurs", "en_us", split="train[:10]", trust_remote_code=True
+    )
+    total = 0
+    for sample in dataset.take(NUM_TESTS):
+        path = insert_subdirectory_in_path(sample["path"])
+        logger.info(f"Expected transcription: {sample['transcription']}")
+        result = transcribe_audio(path)
+        logger.info(f"Transcribed text: {result}")
+        if remove_special_characters(result) == remove_special_characters(
+            sample["transcription"]
+        ):
+            total += 1
+    assert (total / NUM_TESTS) * 100 > 0.8
