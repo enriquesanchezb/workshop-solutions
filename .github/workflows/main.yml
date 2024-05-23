@@ -10,7 +10,46 @@ permissions:
   contents: read
 
 jobs:
+  setup-ollama:
+    runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-ollama.outputs.key }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Cache Ollama
+        id: cache-ollama
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/bin/ollama
+          key: ${{ runner.os }}-ollama-${{ hashFiles('**/ollama_version') }}
+          restore-keys: |
+            ${{ runner.os }}-ollama-
+
+      - name: Install Ollama
+        if: steps.cache-ollama.outputs.cache-hit != 'true'
+        run: |
+          apt-get update && apt-get install -y git build-essential curl
+          curl https://ollama.ai/install.sh | sh
+          ollama serve&
+          ollama pull phi3
+          ollama pull llama3
+
   test:
+    needs: setup-ollama
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -32,16 +71,7 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
-        run: |
-          poetry install
-
-      - name: Install Ollama
-        run: |
-          apt-get update && apt-get install -y git build-essential curl
-          curl https://ollama.ai/install.sh | sh
-          ollama serve&
-          ollama pull phi3
-          ollama pull llama3
+        run: poetry install
 
       - name: Run specific test
         run: |
